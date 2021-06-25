@@ -3,18 +3,33 @@ local menu = require("src/menu")
 
 local icon = love.image.newImageData("assets/icon.png");
 
-local state = "menu"
+local state = "game"
+local loadGame = false
+local loadMenu = false
 
 function love.load() 
   	love.window.setTitle("Pokemon")
 	love.window.setMode(960, 640)
   	love.graphics.setBackgroundColor(1,1,1)
   	love.window.setIcon(icon)
+  	io.stdout:setvbuf("no")
 end
 
 function love.update(dt)
-	if state == "game" then game.update(dt) end
-	if state == "menu" then menu.update(dt) end
+	if state == "game" then 
+		if loadGame == false then
+			game.load()
+			loadGame = true
+		end
+		game.update(dt) 
+	end
+	if state == "menu" then 
+		if loadMenu == false then
+			menu.load()
+			loadMenu = true
+		end
+		menu.update(dt) 
+	end
 end
 
 function love.draw() 
