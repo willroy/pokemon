@@ -13,6 +13,7 @@ function love.load()
   	love.graphics.setBackgroundColor(1,1,1)
   	love.window.setIcon(icon)
   	io.stdout:setvbuf("no")
+  	love.graphics.setDefaultFilter("nearest", "nearest")
 end
 
 function love.update(dt)

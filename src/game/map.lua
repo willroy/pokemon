@@ -19,16 +19,14 @@ local otheri = love.graphics.newImage("assets/interiorgeneral/other.png")
 local spriteSheets = {["vegetation"] = vegetation, ["groundtiles"] = groundtiles, ["rocks"] = rocks, ["items"] = items, ["othero"] = othero, ["buildings"] = buildings, ["walls"] = walls, ["flooring"] = flooring, ["stairs"] = stairs, ["misc"] = misc, ["electronics"] = electronics, ["tables"] = tables, ["otheri"] = otheri}
 
 local characters = love.graphics.newImage("assets/characters/characters.png")
-local character = {["front"] = love.graphics.newQuad(103, 0, 14, 21, characters),
-				   ["frontWalk"] = love.graphics.newQuad(148, 0, 15, 21, characters),
-					["back"] = love.graphics.newQuad(118, 0, 14, 21, characters),
-					["backWalk"] = love.graphics.newQuad(164, 0, 14, 21, characters),
-					["left"] = love.graphics.newQuad(133, 0, 14, 21, characters),
-					["leftWalk"] = love.graphics.newQuad(179, 0, 14, 21, characters),
-				   ["right"] = love.graphics.newQuad(133, 0, 14, 21, characters),
-				   ["rightWalk"] = love.graphics.newQuad(179, 0, 14, 21, characters)}
-
-local aniCharacterNow = {characters, character["front"], 448,  280, 0, 2, 2}
+local character = {["front"] = love.graphics.newQuad(206, 0, 28, 42, characters),
+				   ["frontWalk"] = love.graphics.newQuad(296, 0, 30, 42, characters),
+					["back"] = love.graphics.newQuad(236, 0, 28, 42, characters),
+					["backWalk"] = love.graphics.newQuad(328, 0, 28, 42, characters),
+					["left"] = love.graphics.newQuad(266, 0, 28, 42, characters),
+					["leftWalk"] = love.graphics.newQuad(358, 0, 28, 42, characters),
+				   ["right"] = love.graphics.newQuad(266, 0, 28, 42, characters),
+				   ["rightWalk"] = love.graphics.newQuad(358, 0, 28, 42, characters)}
 
 local tiles
 local chunks
@@ -37,10 +35,12 @@ local mapPath
 
 local lockMovement = false
 local directionX = ""
-local directionY = ""
+local directionY = 0
 local charX = 0
 local charY = 0
 local time = 0
+local lock = false
+local moving = false
 
 local function roundDown(n)
   for i=0,32 do
@@ -58,10 +58,20 @@ end
 function map.update(dt)
 	time = time + dt
 
-	if (charX % 32 == 0) and (charY % 32 == 0) then moving = false end
+	if (charX % 32 == 0) and (charY % 32 == 0) and lock then moving = false end
+
+	if moving == true then lock = true end
+
+	if directionX == 1 and moving then charX = charX + 4 end
+	if directionX == 0 and moving then charX = charX - 4 end
+
+	if directionY == 1 and moving then charY = charY + 4 end
+	if directionY == 0 and moving then charY = charY - 4 end
+
 	if moving == false then
 		if love.keyboard.isDown("w") or love.keyboard.isDown("a") or love.keyboard.isDown("s") or love.keyboard.isDown("d") then
 			moving = true
+			lock = false
 			directionX = ""
 			directionY = ""
 		end
@@ -70,12 +80,6 @@ function map.update(dt)
 		elseif love.keyboard.isDown("a") then directionX = 1
 		elseif love.keyboard.isDown("d") then directionX = 0 end
 	end
-
-	if directionX == 1 and moving then charX = charX + 4 end
-	if directionX == 0 and moving then charX = charX - 4 end
-
-	if directionY == 1 and moving then charY = charY + 4 end
-	if directionY == 0 and moving then charY = charY - 4 end
 end
 
 function map.draw() 
@@ -89,24 +93,23 @@ function map.draw()
 		end
 	end
 
-	love.graphics.setDefaultFilter("nearest", "nearest")
 	if not moving then
-		if directionY == 0 then love.graphics.draw(characters, character["front"], 448, 280, 0, 2, 2) end
-		if directionY == 1 then love.graphics.draw(characters, character["back"], 448, 280, 0, 2, 2) end
-		if directionX == 0 then love.graphics.draw(characters, character["right"], 480, 280, 0, -2, 2) end
-		if directionX == 1 then love.graphics.draw(characters, character["left"], 448, 280, 0, 2, 2) end
+		if directionY == 0 then love.graphics.draw(characters, character["front"], 448, 280) end
+		if directionY == 1 then love.graphics.draw(characters, character["back"], 448, 280) end
+		if directionX == 0 then love.graphics.draw(characters, character["right"], 480, 280, 0, -1, 1) end
+		if directionX == 1 then love.graphics.draw(characters, character["left"], 448, 280) end
 	end
 
 	if moving then 
-		if directionY == 0 and time < 0.25 then love.graphics.draw(characters, character["front"], 448, 280, 0, 2, 2) end
-		if directionY == 1 and time < 0.25 then love.graphics.draw(characters, character["back"], 448, 280, 0, 2, 2) end
-		if directionX == 0 and time < 0.25 then love.graphics.draw(characters, character["right"], 480, 280, 0, -2, 2) end
-		if directionX == 1 and time < 0.25 then love.graphics.draw(characters, character["left"], 448, 280, 0, 2, 2) end
+		if directionY == 0 and time < 0.25 then love.graphics.draw(characters, character["front"], 448, 280) end
+		if directionY == 1 and time < 0.25 then love.graphics.draw(characters, character["back"], 448, 280) end
+		if directionX == 0 and time < 0.25 then love.graphics.draw(characters, character["right"], 480, 280, 0, -1, 1) end
+		if directionX == 1 and time < 0.25 then love.graphics.draw(characters, character["left"], 448, 280) end
 
-		if directionY == 0 and time > 0.25 then love.graphics.draw(characters, character["frontWalk"], 446, 280, 0, 2, 2) end
-		if directionY == 1 and time > 0.25 then love.graphics.draw(characters, character["backWalk"], 448, 280, 0, 2, 2) end
-		if directionX == 0 and time > 0.25 then love.graphics.draw(characters, character["rightWalk"], 480, 278, 0, -2, 2) end
-		if directionX == 1 and time > 0.25 then love.graphics.draw(characters, character["leftWalk"], 448, 278, 0, 2, 2) end
+		if directionY == 0 and time > 0.25 then love.graphics.draw(characters, character["frontWalk"], 446, 280) end
+		if directionY == 1 and time > 0.25 then love.graphics.draw(characters, character["backWalk"], 448, 280) end
+		if directionX == 0 and time > 0.25 then love.graphics.draw(characters, character["rightWalk"], 480, 278, 0, -1, 1) end
+		if directionX == 1 and time > 0.25 then love.graphics.draw(characters, character["leftWalk"], 448, 278) end
 	end
 
 	if time > 0.5 then time = 0 end
@@ -154,6 +157,7 @@ function map.getChunks()
 			tmp[#tmp+1] = {{(x-1)*640, (y-1)*640}, {}}
 		end
 	end
+	-- might need to do tiles[i][1]-lowX to make sure that chunks start from first tile not 0, 0
 	for i = 1, #tiles do
 		local chunk = math.ceil(tiles[i][1]/640)
 		tmp[chunk][2][#tmp[chunk][2]+1] = {roundDown(tiles[i][1])-(tmp[chunk][1][1]), roundDown(tiles[i][2])-(tmp[chunk][1][2]), tiles[i][3], tiles[i][4], tiles[i][5]}
