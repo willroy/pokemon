@@ -142,6 +142,8 @@ function map.getChunks()
 	lowY = 10000000
 	highX = 0
 	highY = 0
+	--need to do a test and db correction to make sure that lowX and lowY is set to 0, 0 
+	--and to make sure that every other tile is updated to match new pos
 	for i = 1, #tiles do
 		if lowX > tiles[i][1] then lowX = tiles[i][1] end
 		if lowY > tiles[i][2] then lowY = tiles[i][2] end
@@ -160,6 +162,7 @@ function map.getChunks()
 	-- might need to do tiles[i][1]-lowX to make sure that chunks start from first tile not 0, 0
 	for i = 1, #tiles do
 		local chunk = math.ceil(tiles[i][1]/640)
+		print(math.ceil(tiles[i][1]/640))
 		tmp[chunk][2][#tmp[chunk][2]+1] = {roundDown(tiles[i][1])-(tmp[chunk][1][1]), roundDown(tiles[i][2])-(tmp[chunk][1][2]), tiles[i][3], tiles[i][4], tiles[i][5]}
 	end
     chunks = tmp
