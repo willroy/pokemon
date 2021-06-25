@@ -1,13 +1,13 @@
-game = require("game")
-menu = require("menu")
+local game = require("src/game")
+local menu = require("src/menu")
 
 local icon = love.image.newImageData("assets/icon.png");
 
-local state = "game"
+local state = "menu"
 
 function love.load() 
   	love.window.setTitle("Pokemon")
-	love.window.setMode(1300, 1000)
+	love.window.setMode(960, 640)
   	love.graphics.setBackgroundColor(1,1,1)
   	love.window.setIcon(icon);
 end
