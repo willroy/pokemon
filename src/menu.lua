@@ -28,6 +28,7 @@ function menu.mousepressed(x, y, button, istouch)
 end
 
 function menu.keypressed(key, code)
+	setState("game")
 end
 
 function menu.wheelmoved(x, y)

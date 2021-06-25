@@ -1,9 +1,53 @@
 local map = {}
 
+local background = love.graphics.newImage("assets/background.png")
+
+local vegetation = love.graphics.newImage("assets/outside/vegetation.png")
+local groundtiles = love.graphics.newImage("assets/outside/groundTiles.png")
+local rocks = love.graphics.newImage("assets/outside/rocks.png")
+local items = love.graphics.newImage("assets/outside/items.png")
+local othero = love.graphics.newImage("assets/outside/other.png")
+local buildings = love.graphics.newImage("assets/outside/buildings.png")
+local walls = love.graphics.newImage("assets/interiorgeneral/walls.png")
+local flooring = love.graphics.newImage("assets/interiorgeneral/flooring.png")
+local stairs = love.graphics.newImage("assets/interiorgeneral/stairs.png")
+local misc = love.graphics.newImage("assets/interiorgeneral/misc.png")
+local electronics = love.graphics.newImage("assets/interiorgeneral/electronics.png")
+local tables = love.graphics.newImage("assets/interiorgeneral/tables.png")
+local otheri = love.graphics.newImage("assets/interiorgeneral/other.png")
+
+local spriteSheets = {["vegetation"] = vegetation, ["groundtiles"] = groundtiles, ["rocks"] = rocks, ["items"] = items, ["othero"] = othero, ["buildings"] = buildings, ["walls"] = walls, ["flooring"] = flooring, ["stairs"] = stairs, ["misc"] = misc, ["electronics"] = electronics, ["tables"] = tables, ["otheri"] = otheri}
+
+local characters = love.graphics.newImage("assets/characters/characters.png")
+local character = {["front"] = love.graphics.newQuad(103, 0, 14, 21, characters),
+				   ["frontWalk"] = love.graphics.newQuad(148, 0, 15, 21, characters),
+					["back"] = love.graphics.newQuad(118, 0, 14, 21, characters),
+					["backWalk"] = love.graphics.newQuad(164, 0, 14, 21, characters),
+					["left"] = love.graphics.newQuad(133, 0, 14, 21, characters),
+					["leftWalk"] = love.graphics.newQuad(179, 0, 14, 21, characters),
+				   ["right"] = love.graphics.newQuad(133, 0, 14, 21, characters),
+				   ["rightWalk"] = love.graphics.newQuad(179, 0, 14, 21, characters)}
+
+local aniCharacterNow = {characters, character["front"], 448,  280, 0, 2, 2}
+
 local tiles
 local chunks
 local loadedChunks
 local mapPath
+
+local lockMovement = false
+local directionX = ""
+local directionY = ""
+local charX = 0
+local charY = 0
+local time = 0
+
+local function roundDown(n)
+  for i=0,32 do
+    if n % 32 == 0 then return n end
+    n = n - 1
+  end
+end
 
 function map.load() 
   	love.window.setTitle("Pokemon")
@@ -12,21 +56,60 @@ function map.load()
 end
 
 function map.update(dt)
-	if love.keyboard.isDown("w") then
-		map.loadChunks()
+	time = time + dt
+
+	if (charX % 32 == 0) and (charY % 32 == 0) then moving = false end
+	if moving == false then
+		if love.keyboard.isDown("w") or love.keyboard.isDown("a") or love.keyboard.isDown("s") or love.keyboard.isDown("d") then
+			moving = true
+			directionX = ""
+			directionY = ""
+		end
+		if love.keyboard.isDown("w") then directionY = 1
+		elseif love.keyboard.isDown("s") then directionY = 0
+		elseif love.keyboard.isDown("a") then directionX = 1
+		elseif love.keyboard.isDown("d") then directionX = 0 end
 	end
-	if love.keyboard.isDown("a") then
-		map.loadChunks()
-	end
-	if love.keyboard.isDown("s") then
-		map.loadChunks()
-	end
-	if love.keyboard.isDown("d") then
-		map.loadChunks()
-	end
+
+	if directionX == 1 and moving then charX = charX + 4 end
+	if directionX == 0 and moving then charX = charX - 4 end
+
+	if directionY == 1 and moving then charY = charY + 4 end
+	if directionY == 0 and moving then charY = charY - 4 end
 end
 
 function map.draw() 
+	love.graphics.draw(background, 0+charX, 0+charY)
+
+	for i = 1, #chunks do
+		for a = 1, #chunks[i][2] do
+			local img = spriteSheets[chunks[i][2][a][5]]
+			local quad = love.graphics.newQuad(chunks[i][2][a][3], chunks[i][2][a][4], 32, 32, img)
+			love.graphics.draw(img, quad, chunks[i][1][1]+chunks[i][2][a][1]+charX, chunks[i][1][2]+chunks[i][2][a][2]+charY)
+		end
+	end
+
+	love.graphics.setDefaultFilter("nearest", "nearest")
+	if not moving then
+		if directionY == 0 then love.graphics.draw(characters, character["front"], 448, 280, 0, 2, 2) end
+		if directionY == 1 then love.graphics.draw(characters, character["back"], 448, 280, 0, 2, 2) end
+		if directionX == 0 then love.graphics.draw(characters, character["right"], 480, 280, 0, -2, 2) end
+		if directionX == 1 then love.graphics.draw(characters, character["left"], 448, 280, 0, 2, 2) end
+	end
+
+	if moving then 
+		if directionY == 0 and time < 0.25 then love.graphics.draw(characters, character["front"], 448, 280, 0, 2, 2) end
+		if directionY == 1 and time < 0.25 then love.graphics.draw(characters, character["back"], 448, 280, 0, 2, 2) end
+		if directionX == 0 and time < 0.25 then love.graphics.draw(characters, character["right"], 480, 280, 0, -2, 2) end
+		if directionX == 1 and time < 0.25 then love.graphics.draw(characters, character["left"], 448, 280, 0, 2, 2) end
+
+		if directionY == 0 and time > 0.25 then love.graphics.draw(characters, character["frontWalk"], 446, 280, 0, 2, 2) end
+		if directionY == 1 and time > 0.25 then love.graphics.draw(characters, character["backWalk"], 448, 280, 0, 2, 2) end
+		if directionX == 0 and time > 0.25 then love.graphics.draw(characters, character["rightWalk"], 480, 278, 0, -2, 2) end
+		if directionX == 1 and time > 0.25 then love.graphics.draw(characters, character["leftWalk"], 448, 278, 0, 2, 2) end
+	end
+
+	if time > 0.5 then time = 0 end
 end
 
 function map.mousepressed(x, y, button, istouch)
@@ -36,7 +119,6 @@ function map.keypressed(key, code)
 end
 
 function map.wheelmoved(x, y)
-
 end
 
 function map.getTiles()
@@ -57,28 +139,24 @@ function map.getChunks()
 	lowY = 10000000
 	highX = 0
 	highY = 0
-	-- Get top left tile and bottom right tile locations
 	for i = 1, #tiles do
 		if lowX > tiles[i][1] then lowX = tiles[i][1] end
 		if lowY > tiles[i][2] then lowY = tiles[i][2] end
 		if highX < tiles[i][1] then highX = tiles[i][1] end
 		if highY < tiles[i][2] then highY = tiles[i][2] end
 	end
-	-- Get difference amount of chunks that can fit on map
 	xDiff = highX - lowX
 	yDiff = highY - lowY
 	xDiff = math.ceil(xDiff / 640)
 	yDiff = math.ceil(yDiff / 640)
-	-- make a chunk for each possible chunk position on map
 	for x = 1, xDiff do
 		for y = 1, yDiff do
 			tmp[#tmp+1] = {{(x-1)*640, (y-1)*640}, {}}
 		end
 	end
-	-- Add tile to chunk based on which chunk the tile is in
 	for i = 1, #tiles do
 		local chunk = math.ceil(tiles[i][1]/640)
-		tmp[chunk][2][#tmp[chunk][2]+1] = {tiles[i][1], tiles[i][2], tiles[i][3], tiles[i][4], tiles[i][5]}
+		tmp[chunk][2][#tmp[chunk][2]+1] = {roundDown(tiles[i][1])-(tmp[chunk][1][1]), roundDown(tiles[i][2])-(tmp[chunk][1][2]), tiles[i][3], tiles[i][4], tiles[i][5]}
 	end
     chunks = tmp
 end

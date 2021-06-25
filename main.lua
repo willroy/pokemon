@@ -3,7 +3,7 @@ local menu = require("src/menu")
 
 local icon = love.image.newImageData("assets/icon.png");
 
-local state = "game"
+local state = "menu"
 local loadGame = false
 local loadMenu = false
 
@@ -50,4 +50,8 @@ end
 function love.wheelmoved(x, y)
 	if state == "game" then game.wheelmoved(x, y) end
 	if state == "menu" then menu.wheelmoved(x, y) end
+end
+
+function setState(newState)
+	state = newState
 end
