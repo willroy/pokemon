@@ -142,16 +142,20 @@ function map.getChunks()
 	lowY = 10000000
 	highX = 0
 	highY = 0
-	--need to do a test and db correction to make sure that lowX and lowY is set to 0, 0 
-	--and to make sure that every other tile is updated to match new pos
 	for i = 1, #tiles do
 		if lowX > tiles[i][1] then lowX = tiles[i][1] end
 		if lowY > tiles[i][2] then lowY = tiles[i][2] end
 		if highX < tiles[i][1] then highX = tiles[i][1] end
 		if highY < tiles[i][2] then highY = tiles[i][2] end
 	end
-	xDiff = highX - lowX
-	yDiff = highY - lowY
+
+	for i = 1, #tiles do
+		tiles[i][1] = tiles[i][1] - lowX 
+		tiles[i][2] = tiles[i][2] - lowY 
+	end 
+
+	xDiff = highX-lowX - 0
+	yDiff = highY-lowY - 0
 	xDiff = math.ceil(xDiff / 640)
 	yDiff = math.ceil(yDiff / 640)
 	for x = 1, xDiff do
@@ -159,16 +163,24 @@ function map.getChunks()
 			tmp[#tmp+1] = {{(x-1)*640, (y-1)*640}, {}}
 		end
 	end
-	-- might need to do tiles[i][1]-lowX to make sure that chunks start from first tile not 0, 0
+
 	for i = 1, #tiles do
-		local chunk = math.ceil(tiles[i][1]/640)
-		print(math.ceil(tiles[i][1]/640))
-		tmp[chunk][2][#tmp[chunk][2]+1] = {roundDown(tiles[i][1])-(tmp[chunk][1][1]), roundDown(tiles[i][2])-(tmp[chunk][1][2]), tiles[i][3], tiles[i][4], tiles[i][5]}
+		local chunk = {}
+		for a = 1, #tmp do
+			if tmp[a][1][1] <= tiles[i][1] and tmp[a][1][1]+640 > tiles[i][1] then 
+				if tmp[a][1][2] <= tiles[i][2] and tmp[a][1][2]+640 > tiles[i][2] then
+					chunk = tmp[a] 
+					break
+				end
+			end
+		end
+		chunk[2][#chunk[2]+1] = {roundDown(tiles[i][1])-(chunk[1][1]), roundDown(tiles[i][2])-(chunk[1][2]), tiles[i][3], tiles[i][4], tiles[i][5]}
 	end
     chunks = tmp
 end
 
 function map.getLoadedChunks(chunks)
+	--To get specific chunks within radius of player
 end
 
 return map
