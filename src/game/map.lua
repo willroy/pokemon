@@ -126,7 +126,7 @@ end
 
 function map.getTiles()
 	local tmp = {}
-	for line in io.lines(love.filesystem.getWorkingDirectory().."/../../db/map.proj") do
+	for line in io.lines(love.filesystem.getWorkingDirectory().."/db/map.proj") do
     	item = {}
 		for substring in line:gmatch("%S+") do
 			table.insert(item, substring)
